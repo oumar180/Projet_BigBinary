@@ -35,5 +35,35 @@ int main() {
     libereBigBinary(&R);
     libereBigBinary(&G);
 
+    printf("\n=== PHASE 3 : RSA Simplifier ===\n");
+
+    // Définition des clés RSA et du message
+    BigBinary n = creerBigBinaryDepuisChaine("110010100001"); // n = 3233
+    int e = 17;
+    BigBinary d = creerBigBinaryDepuisChaine("101011000001"); // d = 2753
+    BigBinary message = creerBigBinaryDepuisChaine("1010010");   // M = 82
+
+    printf("Message original : ");
+    afficheBigBinary(message);
+    printf("n = "); afficheBigBinary(n);
+    printf("e = %d\n", e);
+    printf("d = "); afficheBigBinary(d);
+
+    // Chiffrement du message
+    BigBinary chiffre = BigBinary_RSA_encrypt(message, e, n);
+    printf("\nMessage chiffrer : ");
+    afficheBigBinary(chiffre);
+
+    // Déchiffrement du message
+    BigBinary dechiffre = BigBinary_RSA_decrypt(chiffre, d, n);
+    printf("Message dechiffrer : ");
+    afficheBigBinary(dechiffre);
+    
+    // Libération de la mémoire
+    libereBigBinary(&n);
+    libereBigBinary(&d);
+    libereBigBinary(&message);
+    libereBigBinary(&chiffre);
+    libereBigBinary(&dechiffre);
     return 0;
 }

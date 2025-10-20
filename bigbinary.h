@@ -33,4 +33,9 @@ BigBinary BigBinary_mod(BigBinary A, BigBinary B);
 BigBinary BigBinary_PGCD(BigBinary A, BigBinary B);
 BigBinary BigBinary_expMod(BigBinary base, int exp, BigBinary mod);
 
+//Phase 3
+BigBinary BigBinary_RSA_encrypt(BigBinary message, int e, BigBinary n);
+BigBinary BigBinary_expMod_Big(BigBinary base, BigBinary exp, BigBinary mod);
+BigBinary BigBinary_RSA_decrypt(BigBinary cipher, BigBinary d, BigBinary n);
+
 #endif

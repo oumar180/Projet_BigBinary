@@ -144,24 +144,6 @@ BigBinary Soustraction(BigBinary A, BigBinary B) {
     return res;
 }
 
-// === Multiplication binaire ===
-BigBinary Multiplication(BigBinary A, BigBinary B) {
-    BigBinary res = creerBigBinaryDepuisChaine("0");
-    for (int i = B.Taille - 1; i >= 0; i--) {
-        if (B.Tdigits[i] == 1) {
-            BigBinary tmp = initBigBinary(res.Taille + (B.Taille - i), +1);
-            for (int j = 0; j < res.Taille; j++)
-                tmp.Tdigits[j + (B.Taille - i - 1)] = res.Tdigits[j];
-            BigBinary sum = Addition(tmp, A);
-            libereBigBinary(&res);
-            libereBigBinary(&tmp);
-            res = sum;
-        }
-    }
-    return res;
-}
-
-// === Modulo ===
 
 // Supprime les zéros en tête
 void trimLeadingZeros(BigBinary *nb) {
@@ -178,6 +160,48 @@ void trimLeadingZeros(BigBinary *nb) {
     }
 }
 
+// === Multiplication binaire ===
+BigBinary Multiplication(BigBinary A, BigBinary B) {
+    // Le résultat final commence à 0
+    BigBinary resultat = creerBigBinaryDepuisChaine("0");
+
+    // On parcourt les bits de B de droite à gauche (du bit de poids faible au plus fort)
+    for (int i = B.Taille - 1; i >= 0; i--) {
+        // Si le bit actuel de B est '1'
+        if (B.Tdigits[i] == 1) {
+            // On calcule le décalage nécessaire pour A
+            int decalage = B.Taille - 1 - i;
+
+            // On crée une version de A décalée, avec des zéros à droite
+            BigBinary a_decale = initBigBinary(A.Taille + decalage, A.Signe);
+
+            // On copie les bits de A au début du nouveau tableau
+            for (int j = 0; j < A.Taille; j++) {
+                a_decale.Tdigits[j] = A.Tdigits[j];
+            }
+            // Les zéros à la fin pour le décalage sont déjà là grâce à initBigBinary
+
+            // On additionne ce nombre décalé au résultat cumulé
+            BigBinary nouvelle_somme = Addition(resultat, a_decale);
+
+            // On nettoie la mémoire et on met à jour le résultat
+            libereBigBinary(&resultat);
+            libereBigBinary(&a_decale);
+            resultat = nouvelle_somme;
+        }
+    }
+
+    // Gestion du signe du résultat final
+    if (A.Signe == 0 || B.Signe == 0) {
+        resultat.Signe = 0;
+    } else {
+        resultat.Signe = A.Signe * B.Signe;
+    }
+
+    trimLeadingZeros(&resultat);
+    return resultat;
+}
+// === Modulo ===
 // Modulo binaire sécurisé
 BigBinary BigBinary_mod(BigBinary A, BigBinary B) {
     BigBinary R = copyBigBinary(A);
@@ -191,7 +215,6 @@ BigBinary BigBinary_mod(BigBinary A, BigBinary B) {
 
     return R;
 }
-
 
 // === PGCD binaire ===
 BigBinary BigBinary_PGCD(BigBinary A, BigBinary B) {
@@ -232,4 +255,54 @@ BigBinary BigBinary_expMod(BigBinary base, int exp, BigBinary mod) {
 
     libereBigBinary(&b);
     return result;
+}
+
+BigBinary BigBinary_RSA_encrypt(BigBinary message, int e, BigBinary n) {
+    // On utilise directement la fonction d'exponentiation modulaire existante.
+    return BigBinary_expMod(message, e, n);
+}
+
+BigBinary BigBinary_expMod_Big(BigBinary base, BigBinary exp, BigBinary mod) {
+    BigBinary resultat = creerBigBinaryDepuisChaine("1");
+    BigBinary b = copyBigBinary(base);
+    BigBinary e = copyBigBinary(exp);
+
+    // Tant que l'exposant n'est pas nul
+    while (e.Signe != 0) {
+        // Si le dernier bit de l'exposant est 1 (si e est impair)
+        if (e.Taille > 0 && e.Tdigits[e.Taille - 1] == 1) {
+            BigBinary temp_mul = Multiplication(resultat, b);
+            BigBinary temp_mod = BigBinary_mod(temp_mul, mod);
+            libereBigBinary(&resultat);
+            libereBigBinary(&temp_mul);
+            resultat = temp_mod;
+            trimLeadingZeros(&resultat);
+        }
+
+        // b = (b * b) % mod
+        BigBinary temp_square = Multiplication(b, b);
+        BigBinary temp_mod_square = BigBinary_mod(temp_square, mod);
+        libereBigBinary(&b);
+        libereBigBinary(&temp_square);
+        b = temp_mod_square;
+        trimLeadingZeros(&b);
+
+        // e = e / 2 (décalage binaire à droite)
+        // On supprime simplement le bit de poids faible
+        if (e.Taille > 1) {
+            e.Taille--;
+        } else {
+            // Si c'était le dernier bit, le nombre devient 0
+            libereBigBinary(&e);
+            e = creerBigBinaryDepuisChaine("0");
+        }
+    }
+
+    libereBigBinary(&b);
+    libereBigBinary(&e);
+    return resultat;
+}
+
+BigBinary BigBinary_RSA_decrypt(BigBinary cipher, BigBinary d, BigBinary n) {
+    return BigBinary_expMod_Big(cipher, d, n);
 }
