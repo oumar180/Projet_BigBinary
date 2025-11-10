@@ -3,8 +3,8 @@
 int main() {
     printf("=== PHASE 1 : Operations binaires de base ===\n");
 
-    BigBinary A = creerBigBinaryDepuisChaine("1011"); // 11
-    BigBinary B = creerBigBinaryDepuisChaine("110");  // 6
+    BigBinary A = creerBigBinaryDepuisChaine(" 10101010101001110011101000111110100001011101001000101100011010110000111000000110100011101001"); // 11
+    BigBinary B = creerBigBinaryDepuisChaine("11001011011111111000110000111010000000110101011000000100000010110101101001100011110001011000");  // 6
 
     printf("A = "); afficheBigBinary(A);
     printf("B = "); afficheBigBinary(B);
