@@ -27,6 +27,7 @@ bool Inferieur(BigBinary A, BigBinary B);
 BigBinary Addition(BigBinary A, BigBinary B);
 BigBinary Soustraction(BigBinary A, BigBinary B);
 BigBinary Multiplication(BigBinary A, BigBinary B);
+BigBinary MultiplicationEgyptienne(BigBinary A, BigBinary B);
 
 // Phase 2
 BigBinary BigBinary_mod(BigBinary A, BigBinary B);
